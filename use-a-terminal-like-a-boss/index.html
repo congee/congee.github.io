@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title> - Use a Terminal Like a Boss</title>
+
+      
+
+      
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/slideout/1.0.1/slideout.min.js"></script>
+          
+      
+
+      
+          <link rel="stylesheet" href="https:&#x2F;&#x2F;congee.me&#x2F;site.css">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">Cata</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;congee.me">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;congee.me&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;congee.me">Cata</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;congee.me">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;congee.me&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+
+
+<div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content always-active">
+        <nav id="TableOfContents">
+            <ul>
+                
+                <li>
+                    <a href="https://congee.me/use-a-terminal-like-a-boss/#a-tale-of-two-editing-modes" class="toc-link">A Tale of Two Editing Modes</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://congee.me/use-a-terminal-like-a-boss/#auto-completion" class="toc-link">Auto Completion</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://congee.me/use-a-terminal-like-a-boss/#jummping-around" class="toc-link">Jummping Around</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://congee.me/use-a-terminal-like-a-boss/#fuzzy-matchng-everytihng" class="toc-link">Fuzzy Matchng Everytihng</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://congee.me/use-a-terminal-like-a-boss/#i-have-a-nickname" class="toc-link">I Have A Nickname</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://congee.me/use-a-terminal-like-a-boss/#summary" class="toc-link">Summary</a>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://congee.me/use-a-terminal-like-a-boss/#references" class="toc-link">References</a>
+                    
+                </li>
+                
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+<article class="post">
+    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;congee.me&#x2F;use-a-terminal-like-a-boss&#x2F;">Use a Terminal Like a Boss</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2020-03-25</span>
+            
+        </div>
+    </header>
+
+    <div class="post-content">
+      <p>Welcome to the rabbit hole! This is an introduction to for beginners to make the most of a terminal. Windows is covered. But, because Microsoft ditched its command line (CLI) battle ground in favor of GUI until a few years ago, this article will shift to *nix environment eventually. Generally, programmers that pursue productivity should be should be proficient at *nix. By no means am I am criticizing Windows. You know, &quot;Finally, it's the year of desktop Linux&quot; has been echoing for 20 years. 🙄 </p>
+<p>Hackers are obsessed with abstraction to eliminate repetitive tasks. How could we stand with manually typing everything?</p>
+<h2 id="a-tale-of-two-editing-modes">A Tale of Two Editing Modes</h2>
+<p>Though the holy wars between two editors Vim and Emacs are fading away, long live their spirit.</p>
+<p>Because a single line editing is so efficient in emacs, people made a library called <em>readline</em>. Just pay a little more heed you will find it is everywhere. You can use in most application in macOS, interactive cli tools such as ptpython, mycli, and pgcli. There is even a tool with-readline to empower you on tools that do not natively support readline style key bindings. I just list some frequent shortcuts. Youo can find a comprehensive list of shortcuts on <a href="https://en.wikipedia.org/wiki/GNU_Readline#Emacs_keyboard_shortcuts">wikipedia</a> or its <a href="https://tiswww.cwru.edu/php/chet/readline/readline.html">official docs</a>.</p>
+<ul>
+<li>Ctrl-a moves the cursor to the line start</li>
+<li>Ctrl-w delete a word backwords</li>
+<li>Ctrl-d delete the current character forward</li>
+<li>Ctrl-d also send an EOF, meaning exit when the line is empty</li>
+<li>Ctrl-u clears the content before the cursor</li>
+<li>Ctrl-p takes you to the previous command</li>
+<li>Ctrl-n takes you to be next command</li>
+<li>Alt-f move the cursor forward one word</li>
+<li>Alt-b move the cursor backward one word</li>
+<li>Alt-. insert the last argument of the previous command</li>
+</ul>
+<p>Also, there is a cheat sheet¹ for you to remember these key bindings.
+<br />
+<br />
+<img src="/images/readline.cheatsheet.png" alt="cheatsheet" title="Readline Cheat Sheet" /></p>
+<p>Luckily, although it's not easy to use this emacs style key bindings on cmd.exe, <a href="https://mridgers.github.io/clink">clink</a> is made available.</p>
+<p>In short, the vim mode is best for multi-line editing, while the emacs mode makes you efficient in line editing.</p>
+<h2 id="auto-completion">Auto Completion</h2>
+<p>Do you really type all the path to change into a directory or look for a file? e.g. <code>command C:\Users\username\i\am\a\very\deep\folder\and\then\the\filename.ext?</code>. Surely no. You would stop at <code>comm</code> and press TAB to complete the <code>command</code>, then type <code>C:\Users\usern</code> to get <code>command C:\Users\username\</code>. Yeah, a lot faster than typing everything.</p>
+<p>Can it be faster? Yes. Modern customizable shells such as bash and fish can complete the whole path for you easily with the help of plugins. Zsh just has this builtin. Just typing <code>command /U/u/i/d/f/file</code> followed by tab, you get the whole command line completed.</p>
+<p>What if it is a previous command that you have already typed? I believe you the smart know Ctrl-p does the trick if the command is the just the previous one you have entered. You may press Ctrl-p multiple times if it's not the last one.</p>
+<p>What do you do if it's buried in thousands of command lines you've entered? Search the history. Most readline applications has Ctrl-r that supports fuzzy matching.</p>
+<p>I bet you are not capable of rememrbing command options. And that could be <a href="https://xkcd.com/1168/">distraous</a>. We complete command line options as well.</p>
+<p>There is an example that the shell tries to complete the commit that I would like to fixup.</p>
+<pre style="background-color:#2b303b;">
+<span style="color:#c0c5ce;">~/dev/haskell-ide-engine$ git commit --fixup=
+Completing recent commit object name
+ee5b98c6  -- [HEAD]    Merge pull request #1684 from jneira/changelog (3 weeks ago)
+5ba1655e  -- [HEAD^]   Fix typos in README. Add hint to speed up HIE compilation (3 weeks ago)
+a043333c  -- [a043333c] Correct pr url and formatting (3 weeks ago)
+02815bb0  -- [HEAD^^]  Merge pull request #1681 from alanz/prepare-1.2 (3 weeks ago)
+81acf2ab  -- [81acf2ab] Update Changelog.md (3 weeks ago)
+cb2cab09  -- [cb2cab09] Update Changelog.md (3 weeks ago)
+1072b60b  -- [1072b60b] Update Changelog.md (3 weeks ago)
+fe0b2fea  -- [fe0b2fea] Merge remote-tracking branch &#39;haskell/master&#39; into prepare-1.2 (3 weeks ago)
+4e34be79  -- [HEAD~3]  Merge pull request #1679 from jneira/hask-src-exts-1.22 (3 weeks ago)
+ba8ee55c  -- [ba8ee55c] Avoid unliftio-core &gt;= 0.2 (3 weeks ago)
+02c1d248  -- [02c1d248] Preparing 1.2 release (3 weeks ago)
+2c279e3e  -- [2c279e3e] Add hsimport as source repo package (3 weeks ago)
+59dc5b20  -- [59dc5b20] Remove unnecessary floskell source-repo-pkg (3 weeks ago)
+d5162dee  -- [d5162dee] Use master versions of hsimport and floskell (3 weeks ago)
+de19fbfb  -- [de19fbfb] Set haskell-src-exts lower bound to 1.22 (3 weeks ago)
+a4f726de  -- [HEAD~4]  Merge pull request #1678 from alanz/bump-resolvers (3 weeks ago)
+7538134e  -- [7538134e] Stick with older unliftio-core (3 weeks ago)
+0718c12c  -- [0718c12c] Bump resolvers and hlint to 2.2.11 (3 weeks ago)
+c584f982  -- [HEAD~5]  Merge pull request #1665 from jneira/azure-macos (4 weeks ago)
+7e45d349  -- [7e45d349] Not share jobs arg between shake and build (4 weeks ago)
+Completing commit to be amended
+1.2            HEAD           master         origin/HEAD    origin/master
+</span></pre>
+<p>None of the shells designed for Windows is able to provide you with these powerful functionalities as far as I know.</p>
+<h2 id="jummping-around">Jummping Around</h2>
+<p>Imagine you have to constantly switching between two directories <code>~/src/third_party/package/library/</code> and <code>~/src</code>. It is easy to go back to the short one by just entering <code>cd</code> or <code>cd ~</code> to the home directory and then <code>cd src</code>. But, how to you change into the long directory quickly? Treat these directories like a stack! pushd/popd is supported on both cmd.exe and *nix shells.</p>
+<p><code>pushd ~/src/third_party/package/library/</code> takes you to the long directory. <code>popd</code> takes you to the previous directory. Mainstream *nix shells support them natively. You don't even need to use pushd/popd expecitly. <code>cd</code> just works <code>cd -</code> works the same as popd. You can print the stack using <code>dirs</code> or <code>echo $dirstack</code> to print the stack stored as $dirstack.</p>
+<p>What if you have multiple directories, say 5, to jump among? In zsh, <code>cd -</code> followed by TAB will let you choose one of the directories in the $dirstack. I am lazier. I just enter <code>z library</code> to jump to the long one. There is a well known tool called <a href="https://github.com/wting/autojump">autojump</a>. But people who could not tolerate the slow Python implementation developed their own solutions. <a href="https://github.com/skywind3000/z.lua">z.lua</a> looks prominent.</p>
+<h2 id="fuzzy-matchng-everytihng">Fuzzy Matchng Everytihng</h2>
+<p>Typing a few keywords in Google takes you to almost whatever your want, it's also possible in both the desktop and cli environments. In the last decade, quick launchers have been quite prevailing. Alfred hits its hey day for Mac users. Even Apple has copied its fuzzy searching idea into Spotlight on macOs and iOS. On Windows you could find an arbitraty file on disk in milliseconds as long as the filesystem is NTFS, way faster than Windows Key + search. To tell you a secret, I use Listary rather than Everything.</p>
+<p>There are many fuzzy matching tools for cli. The most popular one is <a href="https://github.com/junegunn/fzf">fzf</a>. It is powerful combined with other commands via unix pipes. E.g. I would like to print the first 5 lines of a file of which &quot;Rename&quot; is a part of the filename. Yeah, there is a sophisticated command for it <code>find . -type f -name &quot;*Rename*&quot; -exec head -5 {} \;</code>. How about his one? <img src="/images/screencast.fzf.gif" alt="fzf" /></p>
+<p>The idea has recently gained popularity. People even coined a term <a href="&#x27;https://blog.repl.it/clui&#x27;">CLUI</a>.</p>
+<h2 id="i-have-a-nickname">I Have A Nickname</h2>
+<p>Greed is good. You might want to sequeeze the terminal's ability by reducing more repetitive key strokes. Ctrl-r to restore your good ol' <code>git log --left-right --graph --oneline --cherry</code> is not satisfying anymore. Let alone, it returns you some arguments you do not want. Well, make it an alias as <code>git-cmp</code>. <code>git cmp master..develop</code> is so simple. Here is the screenshot for <code>git tree</code>: <img src="/images/git-tree.png" alt="git-tree" />. Some shells provide alias such as <code>alias ll=&quot;ls -l&quot;</code> or <code>alias ls=&quot;ls --color=auto&quot;</code> by default.</p>
+<h2 id="summary">Summary</h2>
+<p>To sum up, hackers just like to automate to improve productivity. I did not mention PowerShell, because it's designed for scripting than used as a shell on daily basis. Its ecosystem is not comparable to *nix shell, either.</p>
+<h2 id="references">References</h2>
+<ol>
+<li>Brian Ward, <em><a href="https://nostarch.com/howlinuxworks2">How Linux Works, 2nd Edition</a></em></li>
+</ol>
+
+    </div>
+
+    
+    
+
+    <div class="post-footer">
+        
+            
+                <div class="post-tags">
+                    
+                        <a href="https:&#x2F;&#x2F;congee.me&#x2F;tags&#x2F;terminal&#x2F;">#terminal</a>
+                    
+                        <a href="https:&#x2F;&#x2F;congee.me&#x2F;tags&#x2F;cli&#x2F;">#cli</a>
+                    
+                        <a href="https:&#x2F;&#x2F;congee.me&#x2F;tags&#x2F;command&#x2F;">#command</a>
+                    
+                        <a href="https:&#x2F;&#x2F;congee.me&#x2F;tags&#x2F;unix&#x2F;">#unix</a>
+                    
+                        <a href="https:&#x2F;&#x2F;congee.me&#x2F;tags&#x2F;productivity&#x2F;">#productivity</a>
+                    
+                </div>
+            
+            
+                <div class="post-nav">
+                    
+                    
+                        <a class="next" href="https:&#x2F;&#x2F;congee.me&#x2F;race-condition&#x2F;">Race ›</a>
+                    
+                    
+                    
+                </div>
+            
+
+        
+
+    </div>
+
+    
+    
+</article>
+
+
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https:&#x2F;&#x2F;congee.me&#x2F;even.js" ></script>
+      
+    </body>
+
+</html>

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title></title>
+        <link>https://congee.me</link>
+        <description></description>
+        <generator>Zola</generator>
+        <language>en</language>
+        <atom:link href="https://congee.me/tags/cli/rss.xml" rel="self" type="application/rss+xml"/>
+        <lastBuildDate>Wed, 25 Mar 2020 00:00:00 +0000</lastBuildDate>
+        
+            <item>
+                <title>Use a Terminal Like a Boss</title>
+                <pubDate>Wed, 25 Mar 2020 00:00:00 +0000</pubDate>
+                <link>https://congee.me/use-a-terminal-like-a-boss/</link>
+                <guid>https://congee.me/use-a-terminal-like-a-boss/</guid>
+                <description>&lt;p&gt;Welcome to the rabbit hole! This is an introduction to for beginners to make the most of a terminal. Windows is covered. But, because Microsoft ditched its command line (CLI) battle ground in favor of GUI until a few years ago, this article will shift to *nix environment eventually. Generally, programmers that pursue productivity should be should be proficient at *nix. By no means am I am criticizing Windows. You know, &amp;quot;Finally, it&#x27;s the year of desktop Linux&amp;quot; has been echoing for 20 years. 🙄 &lt;&#x2F;p&gt;
+&lt;p&gt;Hackers are obsessed with abstraction to eliminate repetitive tasks. How could we stand with manually typing everything?&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;a-tale-of-two-editing-modes&quot;&gt;A Tale of Two Editing Modes&lt;&#x2F;h2&gt;
+&lt;p&gt;Though the holy wars between two editors Vim and Emacs are fading away, long live their spirit.&lt;&#x2F;p&gt;
+&lt;p&gt;Because a single line editing is so efficient in emacs, people made a library called &lt;em&gt;readline&lt;&#x2F;em&gt;. Just pay a little more heed you will find it is everywhere. You can use in most application in macOS, interactive cli tools such as ptpython, mycli, and pgcli. There is even a tool with-readline to empower you on tools that do not natively support readline style key bindings. I just list some frequent shortcuts. Youo can find a comprehensive list of shortcuts on &lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;GNU_Readline#Emacs_keyboard_shortcuts&quot;&gt;wikipedia&lt;&#x2F;a&gt; or its &lt;a href=&quot;https:&#x2F;&#x2F;tiswww.cwru.edu&#x2F;php&#x2F;chet&#x2F;readline&#x2F;readline.html&quot;&gt;official docs&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;Ctrl-a moves the cursor to the line start&lt;&#x2F;li&gt;
+&lt;li&gt;Ctrl-w delete a word backwords&lt;&#x2F;li&gt;
+&lt;li&gt;Ctrl-d delete the current character forward&lt;&#x2F;li&gt;
+&lt;li&gt;Ctrl-d also send an EOF, meaning exit when the line is empty&lt;&#x2F;li&gt;
+&lt;li&gt;Ctrl-u clears the content before the cursor&lt;&#x2F;li&gt;
+&lt;li&gt;Ctrl-p takes you to the previous command&lt;&#x2F;li&gt;
+&lt;li&gt;Ctrl-n takes you to be next command&lt;&#x2F;li&gt;
+&lt;li&gt;Alt-f move the cursor forward one word&lt;&#x2F;li&gt;
+&lt;li&gt;Alt-b move the cursor backward one word&lt;&#x2F;li&gt;
+&lt;li&gt;Alt-. insert the last argument of the previous command&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;Also, there is a cheat sheet¹ for you to remember these key bindings.
+&lt;br &#x2F;&gt;
+&lt;br &#x2F;&gt;
+&lt;img src=&quot;&#x2F;images&#x2F;readline.cheatsheet.png&quot; alt=&quot;cheatsheet&quot; title=&quot;Readline Cheat Sheet&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;Luckily, although it&#x27;s not easy to use this emacs style key bindings on cmd.exe, &lt;a href=&quot;https:&#x2F;&#x2F;mridgers.github.io&#x2F;clink&quot;&gt;clink&lt;&#x2F;a&gt; is made available.&lt;&#x2F;p&gt;
+&lt;p&gt;In short, the vim mode is best for multi-line editing, while the emacs mode makes you efficient in line editing.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;auto-completion&quot;&gt;Auto Completion&lt;&#x2F;h2&gt;
+&lt;p&gt;Do you really type all the path to change into a directory or look for a file? e.g. &lt;code&gt;command C:\Users\username\i\am\a\very\deep\folder\and\then\the\filename.ext?&lt;&#x2F;code&gt;. Surely no. You would stop at &lt;code&gt;comm&lt;&#x2F;code&gt; and press TAB to complete the &lt;code&gt;command&lt;&#x2F;code&gt;, then type &lt;code&gt;C:\Users\usern&lt;&#x2F;code&gt; to get &lt;code&gt;command C:\Users\username\&lt;&#x2F;code&gt;. Yeah, a lot faster than typing everything.&lt;&#x2F;p&gt;
+&lt;p&gt;Can it be faster? Yes. Modern customizable shells such as bash and fish can complete the whole path for you easily with the help of plugins. Zsh just has this builtin. Just typing &lt;code&gt;command &#x2F;U&#x2F;u&#x2F;i&#x2F;d&#x2F;f&#x2F;file&lt;&#x2F;code&gt; followed by tab, you get the whole command line completed.&lt;&#x2F;p&gt;
+&lt;p&gt;What if it is a previous command that you have already typed? I believe you the smart know Ctrl-p does the trick if the command is the just the previous one you have entered. You may press Ctrl-p multiple times if it&#x27;s not the last one.&lt;&#x2F;p&gt;
+&lt;p&gt;What do you do if it&#x27;s buried in thousands of command lines you&#x27;ve entered? Search the history. Most readline applications has Ctrl-r that supports fuzzy matching.&lt;&#x2F;p&gt;
+&lt;p&gt;I bet you are not capable of rememrbing command options. And that could be &lt;a href=&quot;https:&#x2F;&#x2F;xkcd.com&#x2F;1168&#x2F;&quot;&gt;distraous&lt;&#x2F;a&gt;. We complete command line options as well.&lt;&#x2F;p&gt;
+&lt;p&gt;There is an example that the shell tries to complete the commit that I would like to fixup.&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#2b303b;&quot;&gt;
+&lt;span style=&quot;color:#c0c5ce;&quot;&gt;~&#x2F;dev&#x2F;haskell-ide-engine$ git commit --fixup=
+Completing recent commit object name
+ee5b98c6  -- [HEAD]    Merge pull request #1684 from jneira&#x2F;changelog (3 weeks ago)
+5ba1655e  -- [HEAD^]   Fix typos in README. Add hint to speed up HIE compilation (3 weeks ago)
+a043333c  -- [a043333c] Correct pr url and formatting (3 weeks ago)
+02815bb0  -- [HEAD^^]  Merge pull request #1681 from alanz&#x2F;prepare-1.2 (3 weeks ago)
+81acf2ab  -- [81acf2ab] Update Changelog.md (3 weeks ago)
+cb2cab09  -- [cb2cab09] Update Changelog.md (3 weeks ago)
+1072b60b  -- [1072b60b] Update Changelog.md (3 weeks ago)
+fe0b2fea  -- [fe0b2fea] Merge remote-tracking branch &amp;#39;haskell&#x2F;master&amp;#39; into prepare-1.2 (3 weeks ago)
+4e34be79  -- [HEAD~3]  Merge pull request #1679 from jneira&#x2F;hask-src-exts-1.22 (3 weeks ago)
+ba8ee55c  -- [ba8ee55c] Avoid unliftio-core &amp;gt;= 0.2 (3 weeks ago)
+02c1d248  -- [02c1d248] Preparing 1.2 release (3 weeks ago)
+2c279e3e  -- [2c279e3e] Add hsimport as source repo package (3 weeks ago)
+59dc5b20  -- [59dc5b20] Remove unnecessary floskell source-repo-pkg (3 weeks ago)
+d5162dee  -- [d5162dee] Use master versions of hsimport and floskell (3 weeks ago)
+de19fbfb  -- [de19fbfb] Set haskell-src-exts lower bound to 1.22 (3 weeks ago)
+a4f726de  -- [HEAD~4]  Merge pull request #1678 from alanz&#x2F;bump-resolvers (3 weeks ago)
+7538134e  -- [7538134e] Stick with older unliftio-core (3 weeks ago)
+0718c12c  -- [0718c12c] Bump resolvers and hlint to 2.2.11 (3 weeks ago)
+c584f982  -- [HEAD~5]  Merge pull request #1665 from jneira&#x2F;azure-macos (4 weeks ago)
+7e45d349  -- [7e45d349] Not share jobs arg between shake and build (4 weeks ago)
+Completing commit to be amended
+1.2            HEAD           master         origin&#x2F;HEAD    origin&#x2F;master
+&lt;&#x2F;span&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;None of the shells designed for Windows is able to provide you with these powerful functionalities as far as I know.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;jummping-around&quot;&gt;Jummping Around&lt;&#x2F;h2&gt;
+&lt;p&gt;Imagine you have to constantly switching between two directories &lt;code&gt;~&#x2F;src&#x2F;third_party&#x2F;package&#x2F;library&#x2F;&lt;&#x2F;code&gt; and &lt;code&gt;~&#x2F;src&lt;&#x2F;code&gt;. It is easy to go back to the short one by just entering &lt;code&gt;cd&lt;&#x2F;code&gt; or &lt;code&gt;cd ~&lt;&#x2F;code&gt; to the home directory and then &lt;code&gt;cd src&lt;&#x2F;code&gt;. But, how to you change into the long directory quickly? Treat these directories like a stack! pushd&#x2F;popd is supported on both cmd.exe and *nix shells.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;code&gt;pushd ~&#x2F;src&#x2F;third_party&#x2F;package&#x2F;library&#x2F;&lt;&#x2F;code&gt; takes you to the long directory. &lt;code&gt;popd&lt;&#x2F;code&gt; takes you to the previous directory. Mainstream *nix shells support them natively. You don&#x27;t even need to use pushd&#x2F;popd expecitly. &lt;code&gt;cd&lt;&#x2F;code&gt; just works &lt;code&gt;cd -&lt;&#x2F;code&gt; works the same as popd. You can print the stack using &lt;code&gt;dirs&lt;&#x2F;code&gt; or &lt;code&gt;echo $dirstack&lt;&#x2F;code&gt; to print the stack stored as $dirstack.&lt;&#x2F;p&gt;
+&lt;p&gt;What if you have multiple directories, say 5, to jump among? In zsh, &lt;code&gt;cd -&lt;&#x2F;code&gt; followed by TAB will let you choose one of the directories in the $dirstack. I am lazier. I just enter &lt;code&gt;z library&lt;&#x2F;code&gt; to jump to the long one. There is a well known tool called &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;wting&#x2F;autojump&quot;&gt;autojump&lt;&#x2F;a&gt;. But people who could not tolerate the slow Python implementation developed their own solutions. &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;skywind3000&#x2F;z.lua&quot;&gt;z.lua&lt;&#x2F;a&gt; looks prominent.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;fuzzy-matchng-everytihng&quot;&gt;Fuzzy Matchng Everytihng&lt;&#x2F;h2&gt;
+&lt;p&gt;Typing a few keywords in Google takes you to almost whatever your want, it&#x27;s also possible in both the desktop and cli environments. In the last decade, quick launchers have been quite prevailing. Alfred hits its hey day for Mac users. Even Apple has copied its fuzzy searching idea into Spotlight on macOs and iOS. On Windows you could find an arbitraty file on disk in milliseconds as long as the filesystem is NTFS, way faster than Windows Key + search. To tell you a secret, I use Listary rather than Everything.&lt;&#x2F;p&gt;
+&lt;p&gt;There are many fuzzy matching tools for cli. The most popular one is &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;junegunn&#x2F;fzf&quot;&gt;fzf&lt;&#x2F;a&gt;. It is powerful combined with other commands via unix pipes. E.g. I would like to print the first 5 lines of a file of which &amp;quot;Rename&amp;quot; is a part of the filename. Yeah, there is a sophisticated command for it &lt;code&gt;find . -type f -name &amp;quot;*Rename*&amp;quot; -exec head -5 {} \;&lt;&#x2F;code&gt;. How about his one? &lt;img src=&quot;&#x2F;images&#x2F;screencast.fzf.gif&quot; alt=&quot;fzf&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;The idea has recently gained popularity. People even coined a term &lt;a href=&quot;&amp;#x27;https:&#x2F;&#x2F;blog.repl.it&#x2F;clui&amp;#x27;&quot;&gt;CLUI&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;i-have-a-nickname&quot;&gt;I Have A Nickname&lt;&#x2F;h2&gt;
+&lt;p&gt;Greed is good. You might want to sequeeze the terminal&#x27;s ability by reducing more repetitive key strokes. Ctrl-r to restore your good ol&#x27; &lt;code&gt;git log --left-right --graph --oneline --cherry&lt;&#x2F;code&gt; is not satisfying anymore. Let alone, it returns you some arguments you do not want. Well, make it an alias as &lt;code&gt;git-cmp&lt;&#x2F;code&gt;. &lt;code&gt;git cmp master..develop&lt;&#x2F;code&gt; is so simple. Here is the screenshot for &lt;code&gt;git tree&lt;&#x2F;code&gt;: &lt;img src=&quot;&#x2F;images&#x2F;git-tree.png&quot; alt=&quot;git-tree&quot; &#x2F;&gt;. Some shells provide alias such as &lt;code&gt;alias ll=&amp;quot;ls -l&amp;quot;&lt;&#x2F;code&gt; or &lt;code&gt;alias ls=&amp;quot;ls --color=auto&amp;quot;&lt;&#x2F;code&gt; by default.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;summary&quot;&gt;Summary&lt;&#x2F;h2&gt;
+&lt;p&gt;To sum up, hackers just like to automate to improve productivity. I did not mention PowerShell, because it&#x27;s designed for scripting than used as a shell on daily basis. Its ecosystem is not comparable to *nix shell, either.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;references&quot;&gt;References&lt;&#x2F;h2&gt;
+&lt;ol&gt;
+&lt;li&gt;Brian Ward, &lt;em&gt;&lt;a href=&quot;https:&#x2F;&#x2F;nostarch.com&#x2F;howlinuxworks2&quot;&gt;How Linux Works, 2nd Edition&lt;&#x2F;a&gt;&lt;&#x2F;em&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+</description>
+            </item>
+        
+    </channel>
+</rss>

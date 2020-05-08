@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+      <!-- Enable responsiveness on mobile devices-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+      <title> - Race</title>
+
+      
+
+      
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/slideout/1.0.1/slideout.min.js"></script>
+          
+      
+
+      
+          <link rel="stylesheet" href="https:&#x2F;&#x2F;congee.me&#x2F;site.css">
+          
+      
+
+      
+      
+    </head>
+
+    <body>
+        <div class="container">
+
+            <div id="mobile-navbar" class="mobile-navbar">
+              <div class="mobile-header-logo">
+                <a href="/" class="logo">Cata</a>
+              </div>
+              <div class="mobile-navbar-icon icon-out">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+
+            <nav id="mobile-menu" class="mobile-menu slideout-menu slideout-menu-left">
+              <ul class="mobile-menu-list">
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;congee.me">
+                            Home
+                        </a>
+                    </li>
+                
+                    <li class="mobile-menu-item">
+                        <a href="https:&#x2F;&#x2F;congee.me&#x2F;tags">
+                            Tags
+                        </a>
+                    </li>
+                
+              </ul>
+            </nav>
+
+            <header id="header">
+                <div class="logo"><a href="https:&#x2F;&#x2F;congee.me">Cata</a></div>
+                <nav class="menu">
+                    <ul>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;congee.me">
+                                    Home
+                                </a>
+                            </li>
+                        
+                            <li>
+                                <a href="https:&#x2F;&#x2F;congee.me&#x2F;tags">
+                                    Tags
+                                </a>
+                            </li>
+                        
+                    </ul>
+                </nav>
+            </header>
+
+            <main>
+                <div class="content" id="mobile-panel">
+                    
+
+
+<div class="post-toc" id="post-toc">
+    <h2 class="post-toc-title">Contents</h2>
+    <div class="post-toc-content always-active">
+        <nav id="TableOfContents">
+            <ul>
+                
+                <li>
+                    <a href="https://congee.me/race-condition/#data-race-vs-race-condition" class="toc-link">Data Race vs Race Condition</a>
+                    
+                    <ul>
+                        
+                        <li>
+                            <a href="https://congee.me/race-condition/#data-race" class="toc-link">Data Race</a>
+                        </li>
+                        
+                        <li>
+                            <a href="https://congee.me/race-condition/#race-condition" class="toc-link">Race Condition</a>
+                        </li>
+                        
+                    </ul>
+                    
+                </li>
+                
+                <li>
+                    <a href="https://congee.me/race-condition/#memory-ordering" class="toc-link">Memory Ordering</a>
+                    
+                    <ul>
+                        
+                        <li>
+                            <a href="https://congee.me/race-condition/#references" class="toc-link">References</a>
+                        </li>
+                        
+                    </ul>
+                    
+                </li>
+                
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+<article class="post">
+    
+    <header class="post__header">
+        <h1 class="post__title">
+            <a href="https:&#x2F;&#x2F;congee.me&#x2F;race-condition&#x2F;">Race</a>
+        </h1>
+        <div class="post__meta">
+            <span class="post__time">2020-05-08</span>
+            
+        </div>
+    </header>
+
+    <div class="post-content">
+      <p>That <em>io_uring</em> got merged in Linux 5.1 got me interested. To make fun out of
+it, I tried to make a wait-free doubly linked list. It was too difficult that I
+went to write a wait-free fixed length ring buffer. Still, I could not
+successfully get it right due to three kinds of races. What are they?</p>
+<h2 id="data-race-vs-race-condition">Data Race vs Race Condition</h2>
+<p>Before we start, we need to know the differences between threads and processes.
+Their meanings differ by context. Generally, processes are used for parallelism
+while threads for concurrency. A simple example is we have two processes running
+on two cores. In one of the processes, we have also have two threads running
+alternatively via context swicthing. And, here be dragons!</p>
+<h3 id="data-race">Data Race</h3>
+<p>Two processes modifying the same memory piece causes data race. Specifically,
+modifying the memory is done in three steps: fetching data from the memory,
+modifying it, and store it back. We don't modify it in-place. To prevent
+processors from modifying data in its cache nearby, we can use the <code>volatile</code>
+keyword to hint compilers to not gerenate that kind of code.</p>
+<p>Okay, let us take a dive into data race. Say we have an initialized variable
+<code>a = 0</code>; And, we want to incement it to 2 by two processes.</p>
+<table><thead><tr><th>process 1</th><th>process 2</th></tr></thead><tbody>
+<tr><td>(1) lea eax, [a]</td><td>(4) lea eax, [a]</td></tr>
+<tr><td>(2) inc eax</td><td>(5) inc eax</td></tr>
+<tr><td>(3) mov eax, [a]</td><td>(6) mov eax, [a]</td></tr>
+</tbody></table>
+<p>What are those possible results? 1 and 2. There are many possible orders of
+execution. I just list two. The result can be 1 if these instructions are
+executed this way 1 -&gt; 2 -&gt; 4 -&gt; 5 -&gt; 3 -&gt; 6. The problem here is (4) get
+executed before (3) is finished. So, the <code>eax</code> register, whose value held is 1,
+is written back to memory. If all these instructions are executed
+<em>sequentially</em>, 1 -&gt; 2 -&gt; 3 -&gt; 4 -&gt; 5 -&gt; 6, the result obviously is 2 that we
+want.</p>
+<p>How do we solve data race problems? Lock. We may use a mutex to exclusively use
+the processor in a time slice.</p>
+<table><thead><tr><th>process 1</th><th>process 2</th></tr></thead><tbody>
+<tr><td>Lock</td><td></td></tr>
+<tr><td>(1) lea eax, [a]</td><td></td></tr>
+<tr><td>(2) inc eax</td><td></td></tr>
+<tr><td>(3) mov eax, [a]</td><td></td></tr>
+<tr><td>Unlock</td><td></td></tr>
+<tr><td></td><td>(4) lea eax, [a]</td></tr>
+<tr><td></td><td>(5) inc eax</td></tr>
+<tr><td></td><td>(6) mov eax, [a]</td></tr>
+</tbody></table>
+<p>Luckily, we do not have to always use a high level mutex from libraries like
+pthread. There are already fine grained lock primitives provided by processors.
+We could just use <code>std::atomic&lt;int&gt; var = 0; var.fetch_add(1)</code> This
+<code>std::fetch_add</code> is an encapsulation of low level instructions (1), (2), (3).
+All three instructions are executed sequantially and exclusively by the
+processor. So, we always see the result of 2 if we use <code>std::fetch_add</code>.</p>
+<p>We often see these primitives used in a lock-free algorithm. This is just a
+convention as these primitives effectively lock the processor in low level. The
+lock is just visible to the hardware. Programmers do not have to explitictly use
+a lock in code.</p>
+<h3 id="race-condition">Race Condition</h3>
+<p>What is race condition paticularly then? Race condition is really all about one
+word: order. It is usually observed in communication with external systems, such
+as IO. Let us print two variables <code>a = 0</code> and <code>b = 1</code>.</p>
+<table><thead><tr><th>process 1</th><th>process 2</th></tr></thead><tbody>
+<tr><td>(1) lea eax, [a]</td><td>(3) lea eax, [b]</td></tr>
+<tr><td>(2) print eax</td><td>(4) print eax</td></tr>
+</tbody></table>
+<p>What will be printed on screen? 01 or 10? Easy. We see 01 if instructions are
+executed in the order of 1 -&gt; 2 -&gt; 3 -&gt;. The result is 10 if executed in 3 -&gt; 4
+-&gt; 1 -&gt; 2.</p>
+<p>Data race is a type of race condition. Remember two processes also share one
+thing they need to mutate: the screen we see.</p>
+<p>Is knowing data race and race condition enough to tackle concurrency problems?
+No! That is why I stumbled on implementing wait-free algorithms aforementioned.
+There is out-of-order execution.</p>
+<h2 id="memory-ordering">Memory Ordering</h2>
+<p>I just heard about out-of-order execution from some marketings slides of
+Intel and AMD and learnt about it a bit from college. Never ever had I thought I
+would need to deal with them. It has been true until I try to learn about
+wait-free techniques. To my surprise, the instructions in above charts can be
+reorderd by either the compiler at compile time of the processor at runtime. Let
+us recall our good old friends <code>a = 0</code> and <code>b = 2</code>. At this time, we increment
+and print them in two threads.</p>
+<table><thead><tr><th>thread 1</th><th>thread 2</th></tr></thead><tbody>
+<tr><td>(1) inc a</td><td>(4) inc b</td></tr>
+<tr><td>(2) print a</td><td>(5) print b</td></tr>
+<tr><td>(3) print b</td><td>(6) print a</td></tr>
+</tbody></table>
+<p>What could be printed on screen? To make it easy, let us use a mutex.</p>
+<table><thead><tr><th>thread 1</th><th>thread 2</th></tr></thead><tbody>
+<tr><td>Mutex Lock</td><td></td></tr>
+<tr><td>(1) inc a</td><td></td></tr>
+<tr><td>(2) print a</td><td></td></tr>
+<tr><td>(3) print b</td><td></td></tr>
+<tr><td>Mutex Unlock</td><td></td></tr>
+<tr><td></td><td>(4) inc b</td></tr>
+<tr><td></td><td>(5) print b</td></tr>
+<tr><td></td><td>(6) print a</td></tr>
+</tbody></table>
+<p>The results can be:<br />
+1231: 1 -&gt; 2 -&gt; 3 -&gt; 4 -&gt; 5 -&gt; 6<br />
+2232: 1 -&gt; 3 -&gt; 2 -&gt; 4 -&gt; 5 -&gt; 6</p>
+<p>Why can (3) <em>happen before</em> (2)? Instructions can be <em>reorered</em>. For the benefit
+of <em>data parallelism</em> the processor is free to execute multiple instructions
+simultanesouly. Also, a compiler can reorder instructions as long as it sees no
+data race. Here is the problem: instructions are run in the order we want! How
+can we make the processor run code in the order we want? Use a memory fence,
+a.k.a. memory barrier.</p>
+<table><thead><tr><th>thread</th></tr></thead><tbody>
+<tr><td>(1) inc a</td></tr>
+<tr><td>(2) print a</td></tr>
+<tr><td>barrier</td></tr>
+<tr><td>(3) print b</td></tr>
+</tbody></table>
+<p>Inserting a barrier between code snippets tells the compiler or processor that
+the code above the barrier must <em>happen before</em> code below the barrier.</p>
+<h3 id="references">References</h3>
+<ol>
+<li><a href="https://lwn.net/Articles/776703/">io_uring</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Happened-before">happened-before</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Memory_ordering">memory ordering</a></li>
+<li><a href="https://www.microsoft.com/en-us/research/publication/make-multiprocessor-computer-correctly-executes-multiprocess-programs/">sequential consistency</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Out-of-order_execution">out-of-order execution</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Race_condition">race condition</a></li>
+</ol>
+
+    </div>
+
+    
+    
+
+    <div class="post-footer">
+        
+            
+                <div class="post-tags">
+                    
+                        <a href="https:&#x2F;&#x2F;congee.me&#x2F;tags&#x2F;data-race&#x2F;">#data race</a>
+                    
+                        <a href="https:&#x2F;&#x2F;congee.me&#x2F;tags&#x2F;race-condition&#x2F;">#race condition</a>
+                    
+                        <a href="https:&#x2F;&#x2F;congee.me&#x2F;tags&#x2F;out-of-order&#x2F;">#out-of-order</a>
+                    
+                        <a href="https:&#x2F;&#x2F;congee.me&#x2F;tags&#x2F;memory-ordering&#x2F;">#memory ordering</a>
+                    
+                        <a href="https:&#x2F;&#x2F;congee.me&#x2F;tags&#x2F;reordering&#x2F;">#reordering</a>
+                    
+                        <a href="https:&#x2F;&#x2F;congee.me&#x2F;tags&#x2F;thread&#x2F;">#thread</a>
+                    
+                        <a href="https:&#x2F;&#x2F;congee.me&#x2F;tags&#x2F;concurrency&#x2F;">#concurrency</a>
+                    
+                        <a href="https:&#x2F;&#x2F;congee.me&#x2F;tags&#x2F;memory-barrier&#x2F;">#memory barrier</a>
+                    
+                        <a href="https:&#x2F;&#x2F;congee.me&#x2F;tags&#x2F;memory-fence&#x2F;">#memory fence</a>
+                    
+                </div>
+            
+            
+                <div class="post-nav">
+                    
+                        <a class="previous" href="https:&#x2F;&#x2F;congee.me&#x2F;use-a-terminal-like-a-boss&#x2F;">‹ Use a Terminal Like a Boss</a>
+                    
+                    
+                    
+                    
+                </div>
+            
+
+        
+
+    </div>
+
+    
+    
+</article>
+
+
+                </div>
+            </main>
+
+            
+            
+        </div>
+
+      
+          <script type="text/javascript" src="https:&#x2F;&#x2F;congee.me&#x2F;even.js" ></script>
+      
+    </body>
+
+</html>

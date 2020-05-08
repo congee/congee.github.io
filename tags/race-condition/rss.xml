@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title></title>
+        <link>https://congee.me</link>
+        <description></description>
+        <generator>Zola</generator>
+        <language>en</language>
+        <atom:link href="https://congee.me/tags/race-condition/rss.xml" rel="self" type="application/rss+xml"/>
+        <lastBuildDate>Fri, 08 May 2020 00:00:00 +0000</lastBuildDate>
+        
+            <item>
+                <title>Race</title>
+                <pubDate>Fri, 08 May 2020 00:00:00 +0000</pubDate>
+                <link>https://congee.me/race-condition/</link>
+                <guid>https://congee.me/race-condition/</guid>
+                <description>&lt;p&gt;That &lt;em&gt;io_uring&lt;&#x2F;em&gt; got merged in Linux 5.1 got me interested. To make fun out of
+it, I tried to make a wait-free doubly linked list. It was too difficult that I
+went to write a wait-free fixed length ring buffer. Still, I could not
+successfully get it right due to three kinds of races. What are they?&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;data-race-vs-race-condition&quot;&gt;Data Race vs Race Condition&lt;&#x2F;h2&gt;
+&lt;p&gt;Before we start, we need to know the differences between threads and processes.
+Their meanings differ by context. Generally, processes are used for parallelism
+while threads for concurrency. A simple example is we have two processes running
+on two cores. In one of the processes, we have also have two threads running
+alternatively via context swicthing. And, here be dragons!&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;data-race&quot;&gt;Data Race&lt;&#x2F;h3&gt;
+&lt;p&gt;Two processes modifying the same memory piece causes data race. Specifically,
+modifying the memory is done in three steps: fetching data from the memory,
+modifying it, and store it back. We don&#x27;t modify it in-place. To prevent
+processors from modifying data in its cache nearby, we can use the &lt;code&gt;volatile&lt;&#x2F;code&gt;
+keyword to hint compilers to not gerenate that kind of code.&lt;&#x2F;p&gt;
+&lt;p&gt;Okay, let us take a dive into data race. Say we have an initialized variable
+&lt;code&gt;a = 0&lt;&#x2F;code&gt;; And, we want to incement it to 2 by two processes.&lt;&#x2F;p&gt;
+&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;process 1&lt;&#x2F;th&gt;&lt;th&gt;process 2&lt;&#x2F;th&gt;&lt;&#x2F;tr&gt;&lt;&#x2F;thead&gt;&lt;tbody&gt;
+&lt;tr&gt;&lt;td&gt;(1) lea eax, [a]&lt;&#x2F;td&gt;&lt;td&gt;(4) lea eax, [a]&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;(2) inc eax&lt;&#x2F;td&gt;&lt;td&gt;(5) inc eax&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;(3) mov eax, [a]&lt;&#x2F;td&gt;&lt;td&gt;(6) mov eax, [a]&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;&#x2F;tbody&gt;&lt;&#x2F;table&gt;
+&lt;p&gt;What are those possible results? 1 and 2. There are many possible orders of
+execution. I just list two. The result can be 1 if these instructions are
+executed this way 1 -&amp;gt; 2 -&amp;gt; 4 -&amp;gt; 5 -&amp;gt; 3 -&amp;gt; 6. The problem here is (4) get
+executed before (3) is finished. So, the &lt;code&gt;eax&lt;&#x2F;code&gt; register, whose value held is 1,
+is written back to memory. If all these instructions are executed
+&lt;em&gt;sequentially&lt;&#x2F;em&gt;, 1 -&amp;gt; 2 -&amp;gt; 3 -&amp;gt; 4 -&amp;gt; 5 -&amp;gt; 6, the result obviously is 2 that we
+want.&lt;&#x2F;p&gt;
+&lt;p&gt;How do we solve data race problems? Lock. We may use a mutex to exclusively use
+the processor in a time slice.&lt;&#x2F;p&gt;
+&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;process 1&lt;&#x2F;th&gt;&lt;th&gt;process 2&lt;&#x2F;th&gt;&lt;&#x2F;tr&gt;&lt;&#x2F;thead&gt;&lt;tbody&gt;
+&lt;tr&gt;&lt;td&gt;Lock&lt;&#x2F;td&gt;&lt;td&gt;&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;(1) lea eax, [a]&lt;&#x2F;td&gt;&lt;td&gt;&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;(2) inc eax&lt;&#x2F;td&gt;&lt;td&gt;&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;(3) mov eax, [a]&lt;&#x2F;td&gt;&lt;td&gt;&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;Unlock&lt;&#x2F;td&gt;&lt;td&gt;&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;&lt;&#x2F;td&gt;&lt;td&gt;(4) lea eax, [a]&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;&lt;&#x2F;td&gt;&lt;td&gt;(5) inc eax&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;&lt;&#x2F;td&gt;&lt;td&gt;(6) mov eax, [a]&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;&#x2F;tbody&gt;&lt;&#x2F;table&gt;
+&lt;p&gt;Luckily, we do not have to always use a high level mutex from libraries like
+pthread. There are already fine grained lock primitives provided by processors.
+We could just use &lt;code&gt;std::atomic&amp;lt;int&amp;gt; var = 0; var.fetch_add(1)&lt;&#x2F;code&gt; This
+&lt;code&gt;std::fetch_add&lt;&#x2F;code&gt; is an encapsulation of low level instructions (1), (2), (3).
+All three instructions are executed sequantially and exclusively by the
+processor. So, we always see the result of 2 if we use &lt;code&gt;std::fetch_add&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;We often see these primitives used in a lock-free algorithm. This is just a
+convention as these primitives effectively lock the processor in low level. The
+lock is just visible to the hardware. Programmers do not have to explitictly use
+a lock in code.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;race-condition&quot;&gt;Race Condition&lt;&#x2F;h3&gt;
+&lt;p&gt;What is race condition paticularly then? Race condition is really all about one
+word: order. It is usually observed in communication with external systems, such
+as IO. Let us print two variables &lt;code&gt;a = 0&lt;&#x2F;code&gt; and &lt;code&gt;b = 1&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;process 1&lt;&#x2F;th&gt;&lt;th&gt;process 2&lt;&#x2F;th&gt;&lt;&#x2F;tr&gt;&lt;&#x2F;thead&gt;&lt;tbody&gt;
+&lt;tr&gt;&lt;td&gt;(1) lea eax, [a]&lt;&#x2F;td&gt;&lt;td&gt;(3) lea eax, [b]&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;(2) print eax&lt;&#x2F;td&gt;&lt;td&gt;(4) print eax&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;&#x2F;tbody&gt;&lt;&#x2F;table&gt;
+&lt;p&gt;What will be printed on screen? 01 or 10? Easy. We see 01 if instructions are
+executed in the order of 1 -&amp;gt; 2 -&amp;gt; 3 -&amp;gt;. The result is 10 if executed in 3 -&amp;gt; 4
+-&amp;gt; 1 -&amp;gt; 2.&lt;&#x2F;p&gt;
+&lt;p&gt;Data race is a type of race condition. Remember two processes also share one
+thing they need to mutate: the screen we see.&lt;&#x2F;p&gt;
+&lt;p&gt;Is knowing data race and race condition enough to tackle concurrency problems?
+No! That is why I stumbled on implementing wait-free algorithms aforementioned.
+There is out-of-order execution.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;memory-ordering&quot;&gt;Memory Ordering&lt;&#x2F;h2&gt;
+&lt;p&gt;I just heard about out-of-order execution from some marketings slides of
+Intel and AMD and learnt about it a bit from college. Never ever had I thought I
+would need to deal with them. It has been true until I try to learn about
+wait-free techniques. To my surprise, the instructions in above charts can be
+reorderd by either the compiler at compile time of the processor at runtime. Let
+us recall our good old friends &lt;code&gt;a = 0&lt;&#x2F;code&gt; and &lt;code&gt;b = 2&lt;&#x2F;code&gt;. At this time, we increment
+and print them in two threads.&lt;&#x2F;p&gt;
+&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;thread 1&lt;&#x2F;th&gt;&lt;th&gt;thread 2&lt;&#x2F;th&gt;&lt;&#x2F;tr&gt;&lt;&#x2F;thead&gt;&lt;tbody&gt;
+&lt;tr&gt;&lt;td&gt;(1) inc a&lt;&#x2F;td&gt;&lt;td&gt;(4) inc b&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;(2) print a&lt;&#x2F;td&gt;&lt;td&gt;(5) print b&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;(3) print b&lt;&#x2F;td&gt;&lt;td&gt;(6) print a&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;&#x2F;tbody&gt;&lt;&#x2F;table&gt;
+&lt;p&gt;What could be printed on screen? To make it easy, let us use a mutex.&lt;&#x2F;p&gt;
+&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;thread 1&lt;&#x2F;th&gt;&lt;th&gt;thread 2&lt;&#x2F;th&gt;&lt;&#x2F;tr&gt;&lt;&#x2F;thead&gt;&lt;tbody&gt;
+&lt;tr&gt;&lt;td&gt;Mutex Lock&lt;&#x2F;td&gt;&lt;td&gt;&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;(1) inc a&lt;&#x2F;td&gt;&lt;td&gt;&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;(2) print a&lt;&#x2F;td&gt;&lt;td&gt;&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;(3) print b&lt;&#x2F;td&gt;&lt;td&gt;&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;Mutex Unlock&lt;&#x2F;td&gt;&lt;td&gt;&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;&lt;&#x2F;td&gt;&lt;td&gt;(4) inc b&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;&lt;&#x2F;td&gt;&lt;td&gt;(5) print b&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;&lt;&#x2F;td&gt;&lt;td&gt;(6) print a&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;&#x2F;tbody&gt;&lt;&#x2F;table&gt;
+&lt;p&gt;The results can be:&lt;br &#x2F;&gt;
+1231: 1 -&amp;gt; 2 -&amp;gt; 3 -&amp;gt; 4 -&amp;gt; 5 -&amp;gt; 6&lt;br &#x2F;&gt;
+2232: 1 -&amp;gt; 3 -&amp;gt; 2 -&amp;gt; 4 -&amp;gt; 5 -&amp;gt; 6&lt;&#x2F;p&gt;
+&lt;p&gt;Why can (3) &lt;em&gt;happen before&lt;&#x2F;em&gt; (2)? Instructions can be &lt;em&gt;reorered&lt;&#x2F;em&gt;. For the benefit
+of &lt;em&gt;data parallelism&lt;&#x2F;em&gt; the processor is free to execute multiple instructions
+simultanesouly. Also, a compiler can reorder instructions as long as it sees no
+data race. Here is the problem: instructions are run in the order we want! How
+can we make the processor run code in the order we want? Use a memory fence,
+a.k.a. memory barrier.&lt;&#x2F;p&gt;
+&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;thread&lt;&#x2F;th&gt;&lt;&#x2F;tr&gt;&lt;&#x2F;thead&gt;&lt;tbody&gt;
+&lt;tr&gt;&lt;td&gt;(1) inc a&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;(2) print a&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;barrier&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;tr&gt;&lt;td&gt;(3) print b&lt;&#x2F;td&gt;&lt;&#x2F;tr&gt;
+&lt;&#x2F;tbody&gt;&lt;&#x2F;table&gt;
+&lt;p&gt;Inserting a barrier between code snippets tells the compiler or processor that
+the code above the barrier must &lt;em&gt;happen before&lt;&#x2F;em&gt; code below the barrier.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;references&quot;&gt;References&lt;&#x2F;h3&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;lwn.net&#x2F;Articles&#x2F;776703&#x2F;&quot;&gt;io_uring&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Happened-before&quot;&gt;happened-before&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Memory_ordering&quot;&gt;memory ordering&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;www.microsoft.com&#x2F;en-us&#x2F;research&#x2F;publication&#x2F;make-multiprocessor-computer-correctly-executes-multiprocess-programs&#x2F;&quot;&gt;sequential consistency&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Out-of-order_execution&quot;&gt;out-of-order execution&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Race_condition&quot;&gt;race condition&lt;&#x2F;a&gt;&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+</description>
+            </item>
+        
+    </channel>
+</rss>
